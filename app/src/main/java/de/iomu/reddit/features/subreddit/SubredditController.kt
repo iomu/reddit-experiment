@@ -10,13 +10,9 @@ import com.facebook.litho.LithoView
 import com.facebook.litho.widget.LinearLayoutInfo
 import com.facebook.litho.widget.Recycler
 import com.facebook.litho.widget.RecyclerBinder
-import com.facebook.litho.widget.Text
-import com.nytimes.android.external.store2.base.impl.Store
 import de.iomu.reddit.R
 import de.iomu.reddit.base.BaseController
 import de.iomu.reddit.data.model.Link
-import de.iomu.reddit.data.model.Listing
-import de.iomu.reddit.data.store.Subreddit
 import de.iomu.reddit.ui.components.TextLinkItem
 import io.reactivex.Observable
 import timber.log.Timber
@@ -38,7 +34,7 @@ class SubredditController : BaseController(), SubredditContract.View {
         context = ComponentContext(container.context)
         binder = RecyclerBinder(context, LinearLayoutInfo(container.context, OrientationHelper.VERTICAL, false))
         return LithoView.create(
-                container.context /* context */,
+                container.context,
                 Recycler.create(context)
                         .binder(binder)
                         .recyclerViewId(R.id.link_list)
@@ -56,7 +52,6 @@ class SubredditController : BaseController(), SubredditContract.View {
     }
 
     override fun apply(action: SubredditContract.ViewAction) {
-        Timber.d("Received action: $action")
         when (action) {
             is SubredditContract.ViewAction.SetLinks -> displayLinks(action.links)
         }

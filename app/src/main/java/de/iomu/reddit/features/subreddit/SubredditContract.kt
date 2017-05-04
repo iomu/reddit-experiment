@@ -1,6 +1,6 @@
 package de.iomu.reddit.features.subreddit
 
-import de.iomu.reddit.base.MviView
+import de.iomu.reddit.base.mvi.MviView
 import de.iomu.reddit.data.model.Link
 import de.iomu.reddit.data.model.Listing
 

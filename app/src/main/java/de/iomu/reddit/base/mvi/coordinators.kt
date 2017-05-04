@@ -1,4 +1,4 @@
-package de.iomu.reddit.base
+package de.iomu.reddit.base.mvi
 
 import com.jakewharton.rxrelay2.PublishRelay
 import de.iomu.reddit.features.subreddit.SubredditContract
@@ -13,10 +13,6 @@ interface Coordinator<in V : MviView<*, *>> {
 interface MviView<I, in A> {
     val intentions: Observable<I>
     fun apply(action: A)
-}
-
-interface StateRenderer<in S> {
-    fun render(state: S)
 }
 
 abstract class BaseCoordinator<I, A, R, VS, in V: MviView<I, *>> : Coordinator<V> {

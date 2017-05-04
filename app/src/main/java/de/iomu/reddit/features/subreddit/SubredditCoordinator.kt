@@ -1,15 +1,12 @@
 package de.iomu.reddit.features.subreddit
 
-import com.jakewharton.rxrelay2.PublishRelay
 import com.nytimes.android.external.store2.base.impl.Store
-import de.iomu.reddit.base.BaseCoordinator
+import de.iomu.reddit.base.mvi.BaseCoordinator
 import de.iomu.reddit.base.ControllerScope
-import de.iomu.reddit.base.Coordinator
 import de.iomu.reddit.data.model.Link
 import de.iomu.reddit.data.model.Listing
 import de.iomu.reddit.data.store.Subreddit
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 import timber.log.Timber
 import javax.inject.Inject
 
