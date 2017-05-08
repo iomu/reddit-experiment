@@ -8,9 +8,9 @@ import dagger.android.ActivityKey
 import dagger.android.AndroidInjector
 import dagger.multibindings.IntoMap
 import de.iomu.reddit.base.ConductorInjectionModule
-import de.iomu.reddit.features.subreddit.SubredditModule
+import de.iomu.reddit.features.subreddit.SubredditInjectionModule
 
-@Subcomponent(modules = arrayOf(ConductorInjectionModule::class, SubredditModule::class))
+@Subcomponent(modules = arrayOf(ConductorInjectionModule::class, SubredditInjectionModule::class))
 interface MainActivityComponent : AndroidInjector<MainActivity> {
     @Subcomponent.Builder
     abstract class Builder : AndroidInjector.Builder<MainActivity>()

@@ -1,5 +1,6 @@
 package de.iomu.reddit.features.subreddit
 
+import android.os.Bundle
 import android.support.v7.widget.OrientationHelper
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +21,7 @@ import io.reactivex.Observable
 import timber.log.Timber
 import javax.inject.Inject
 
-class SubredditController : BaseController(), SubredditContract.View {
+class SubredditController(args: Bundle) : BaseController(args), SubredditContract.View {
     private val pullToRefreshRelay = PublishRelay.create<SubredditContract.ViewIntention.Refresh>()
     private val loadMoreRelay = PublishRelay.create<SubredditContract.ViewIntention.LoadMore>()
 
@@ -29,6 +30,8 @@ class SubredditController : BaseController(), SubredditContract.View {
             return Observable.merge(listOf(pullToRefreshRelay, loadMoreRelay))
         }
 
+    var subreddit: String = args.getString(KEY_SUBREDDIT, "androiddev")
+
     @Inject
     lateinit var coordinator: SubredditCoordinator
 
@@ -36,6 +39,10 @@ class SubredditController : BaseController(), SubredditContract.View {
     lateinit var context: ComponentContext
     private val recyclerController = RecyclerEventsController()
     lateinit var scrollListener: EndlessRecyclerScrollListener
+
+    constructor(subreddit: String) : this(createBundle(subreddit)) {
+        this.subreddit = subreddit
+    }
 
     override fun inflate(inflater: LayoutInflater, container: ViewGroup): View {
         context = ComponentContext(container.context)
@@ -112,5 +119,15 @@ class SubredditController : BaseController(), SubredditContract.View {
         }
         binder.removeRangeAt(0, binder.itemCount)
         binder.insertRangeAt(0, infos)
+    }
+
+    companion object {
+        val KEY_SUBREDDIT = "key_subreddit"
+
+        fun createBundle(subreddit: String): Bundle {
+            return Bundle().apply {
+                putString(KEY_SUBREDDIT, subreddit)
+            }
+        }
     }
 }

@@ -1,25 +1,38 @@
 package de.iomu.reddit.features.subreddit
 
-import dagger.Component
-import dagger.Subcomponent
 import dagger.android.AndroidInjector
 import com.bluelinelabs.conductor.Controller
+import dagger.*
 import de.iomu.reddit.base.ControllerKey
 import dagger.multibindings.IntoMap
-import dagger.Binds
-import dagger.Module
 import de.iomu.reddit.base.ControllerScope
+import javax.inject.Named
 
 @ControllerScope
-@Subcomponent
+@Subcomponent(modules = arrayOf(SubredditModule::class))
 interface SubredditComponent : AndroidInjector<SubredditController> {
-    @Subcomponent.Builder abstract class Builder : AndroidInjector.Builder<SubredditController>()
+    @Subcomponent.Builder abstract class Builder : AndroidInjector.Builder<SubredditController>() {
+        abstract fun subredditModule(subredditModule: SubredditModule): Builder
+        override fun seedInstance(instance: SubredditController) {
+            subredditModule(SubredditModule(instance))
+        }
+    }
 }
 
 @Module(subcomponents = arrayOf(SubredditComponent::class))
-abstract class SubredditModule {
+abstract class SubredditInjectionModule {
     @Binds
     @IntoMap
     @ControllerKey(SubredditController::class)
     internal abstract fun bindYourControllerInjectorFactory(builder: SubredditComponent.Builder): AndroidInjector.Factory<out Controller>
+}
+
+@Module
+class SubredditModule(val controller: SubredditController) {
+    @Provides
+    @ControllerScope
+    @Named("subreddit")
+    fun provideSubreddit(): String {
+        return controller.subreddit
+    }
 }

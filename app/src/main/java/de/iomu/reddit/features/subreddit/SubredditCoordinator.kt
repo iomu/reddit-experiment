@@ -15,9 +15,12 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 import javax.inject.Inject
+import javax.inject.Named
 
 @ControllerScope
-class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer, val store: Store<Listing<Link>, Subreddit>) :
+class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
+                                               val store: Store<Listing<Link>, Subreddit>,
+                                               @Named("subreddit") val subreddit: String) :
         BaseCoordinator<SubredditContract.ViewIntention, SubredditAction, SubredditResult, SubredditContract.ViewState, SubredditContract.View>() {
 
     override val initialState: SubredditContract.ViewState = SubredditContract.ViewState(emptyList())
@@ -80,9 +83,9 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer, 
     private fun loadLinks(loadMore: Observable<SubredditAction.LoadMore>) = { actions: Observable<SubredditAction.LoadLinks> ->
         actions.flatMap {
             val fetch = if (it.refresh) {
-                { after: String? -> store.fetch(Subreddit("android", after)) }
+                { after: String? -> store.fetch(Subreddit(subreddit, after)) }
             } else {
-                { after: String? -> store.get(Subreddit("android", after)) }
+                { after: String? -> store.get(Subreddit(subreddit, after)) }
             }
 
             paginate2<SubredditAction.LoadMore, Option<String>, SubredditResult>(
