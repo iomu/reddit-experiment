@@ -81,7 +81,7 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
 
     // TODO clean this mess up
     private fun loadLinks(loadMore: Observable<SubredditAction.LoadMore>) = { actions: Observable<SubredditAction.LoadLinks> ->
-        actions.flatMap {
+        actions.switchMap {
             val fetch = if (it.refresh) {
                 { after: String? -> store.fetch(Subreddit(subreddit, after)) }
             } else {
