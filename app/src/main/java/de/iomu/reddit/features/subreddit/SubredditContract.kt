@@ -7,6 +7,7 @@ import de.iomu.reddit.data.model.Listing
 interface SubredditContract {
     sealed class ViewIntention {
         object Refresh : ViewIntention()
+        object LoadMore : ViewIntention()
     }
 
     sealed class ViewAction {
@@ -15,19 +16,28 @@ interface SubredditContract {
         data class AddLinks(val links: List<Link>) : ViewAction()
         object ShowLoading : ViewAction()
         object HideLoading : ViewAction()
+        object ShowLoadingMore : ViewAction()
+        object HideLoadingMore : ViewAction()
     }
 
     interface View : MviView<ViewIntention, ViewAction>
 
-    sealed class Action {
-        data class LoadLinks(val refresh: Boolean = false, val after: String? = null) : Action()
-    }
 
-    sealed class Result {
-        data class Error(val message: String) : Result()
-        data class Successful(val links: Listing<Link>) : Result()
-        object InProgress : Result()
-    }
 
-    data class ViewState(val links: List<Link>, val loading: Boolean = false, val error: String = "")
+    data class ViewState(val links: List<Link>, val loading: Boolean = false, val error: String = "",
+                         val isLoadingMore: Boolean = false)
+}
+
+sealed class SubredditResult {
+    data class Error(val message: String) : SubredditResult()
+    data class Successful(val links: Listing<Link>) : SubredditResult()
+    object InProgress : SubredditResult()
+    object LoadMoreInProgress : SubredditResult()
+    object LoadMoreError : SubredditResult()
+    data class LoadMoreSuccessful(val links: Listing<Link>) : SubredditResult()
+}
+
+sealed class SubredditAction {
+    data class LoadLinks(val refresh: Boolean = false, val after: String? = null) : SubredditAction()
+    object LoadMore : SubredditAction()
 }

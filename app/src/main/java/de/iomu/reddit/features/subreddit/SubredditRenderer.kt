@@ -3,9 +3,11 @@ package de.iomu.reddit.features.subreddit
 import com.jakewharton.rxrelay2.BehaviorRelay
 import de.iomu.reddit.base.mvi.RxRenderer
 import de.iomu.reddit.base.mvi.StateRenderer
+import de.iomu.reddit.data.model.Link
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -20,7 +22,16 @@ class SubredditRenderer @Inject constructor(): RxRenderer<SubredditContract.View
             val links = shared
                     .map { it.links }
                     .distinctUntilChanged()
-                    .map { SubredditContract.ViewAction.SetLinks(it) }
+
+            val linkChange = links.startWith(emptyList<Link>())
+                    .zipWith(links, BiFunction { old: List<Link>, new: List<Link> ->
+                        if (old.all { new.contains(it) }) {
+                            SubredditContract.ViewAction.AddLinks(new.minus(old))
+                        } else {
+                            SubredditContract.ViewAction.SetLinks(new)
+                        }
+                    })
+
             val loading = shared.map { it.loading }
                     .distinctUntilChanged()
                     .map { loading ->
@@ -30,7 +41,17 @@ class SubredditRenderer @Inject constructor(): RxRenderer<SubredditContract.View
                             SubredditContract.ViewAction.HideLoading
                         }
                     }
-            Observable.merge(listOf(errors, links, loading))
+
+            val loadingMore = shared.map { it.isLoadingMore }
+                    .distinctUntilChanged()
+                    .map { loading ->
+                        if (loading) {
+                            SubredditContract.ViewAction.ShowLoadingMore
+                        } else {
+                            SubredditContract.ViewAction.HideLoadingMore
+                        }
+                    }
+            Observable.merge(listOf(errors, loading, linkChange, loadingMore))
         }
     }
 }

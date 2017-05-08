@@ -14,7 +14,7 @@ class NetworkModule {
     @Singleton
     fun provideOkHttp(): OkHttpClient {
         val logger = HttpLoggingInterceptor(HttpLoggingInterceptor.Logger { Timber.tag("http").d(it) }).apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.BASIC
         }
         return OkHttpClient.Builder()
                 .addInterceptor(logger)

@@ -33,7 +33,7 @@ class StoreModule {
 
         return StoreBuilder.parsedWithKey<Subreddit, BufferedSource, Listing<Link>>()
                 .fetcher {
-                    redditApi.rawGetLinksForSubreddit(it.name).map { it.source() }
+                    redditApi.rawGetLinksForSubreddit(it.name, it.after).map { it.source() }
                 }
                 .persister(SourcePersister(app.cacheDir, { it.toString() }))
                 .parser(SubredditListingTransformer(GsonParserFactory.createSourceParser(gson, thingListing)))
@@ -55,6 +55,6 @@ class StoreModule {
     }
 }
 
-data class Subreddit(val name: String)
+data class Subreddit(val name: String, val after: String? = null)
 data class LinkKey(val subreddit: String, val id: String)
 
