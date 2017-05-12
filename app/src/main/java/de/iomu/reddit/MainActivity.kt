@@ -49,7 +49,7 @@ class MainActivity : Activity(), HasDispatchingControllerInjector {
 
         val router = Conductor.attachRouter(this, container, savedInstanceState)
         if (!router.hasRootController()) {
-            router.setRoot(RouterTransaction.with(SubredditController("androiddev")))
+            router.setRoot(RouterTransaction.with(SubredditController("android")))
         }
         return router
     }

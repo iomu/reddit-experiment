@@ -25,7 +25,7 @@ class SubredditRenderer @Inject constructor(): RxRenderer<SubredditContract.View
 
             val linkChange = links.startWith(emptyList<Link>())
                     .zipWith(links, BiFunction { old: List<Link>, new: List<Link> ->
-                        if (old.all { new.contains(it) }) {
+                        if (old.all { new.contains(it) } && old.isNotEmpty()) {
                             SubredditContract.ViewAction.AddLinks(new.minus(old))
                         } else {
                             SubredditContract.ViewAction.SetLinks(new)

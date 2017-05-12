@@ -34,6 +34,7 @@ sealed class SubredditResult {
     object InProgress : SubredditResult()
     object LoadMoreInProgress : SubredditResult()
     object LoadMoreError : SubredditResult()
+    object EndOfItems : SubredditResult()
     data class LoadMoreSuccessful(val links: Listing<Link>) : SubredditResult()
 }
 

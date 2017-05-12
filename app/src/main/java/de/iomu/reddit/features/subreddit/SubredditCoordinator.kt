@@ -1,6 +1,5 @@
 package de.iomu.reddit.features.subreddit
 
-import com.jakewharton.rxrelay2.BehaviorRelay
 import com.nytimes.android.external.store2.base.impl.Store
 import de.iomu.reddit.base.mvi.BaseCoordinator
 import de.iomu.reddit.base.ControllerScope
@@ -10,9 +9,7 @@ import de.iomu.reddit.data.store.Subreddit
 import de.iomu.reddit.util.Option
 import de.iomu.reddit.util.toOption
 import io.reactivex.Observable
-import io.reactivex.functions.BiFunction
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 import javax.inject.Inject
 import javax.inject.Named
@@ -51,12 +48,13 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
     override fun reduce(state: SubredditContract.ViewState, result: SubredditResult): SubredditContract.ViewState {
         Timber.d("Reduce: result: %s", result::class.java)
         return when (result) {
-            is SubredditResult.InProgress -> state.copy(loading = true, links = emptyList())
+            is SubredditResult.InProgress -> state.copy(loading = true, isLoadingMore = true, links = emptyList())
             is SubredditResult.Error -> state.copy(loading = false, error = result.message)
             is SubredditResult.Successful -> state.copy(loading = false, links = result.links.children, error = "")
             SubredditResult.LoadMoreInProgress -> state.copy(isLoadingMore = true)
             SubredditResult.LoadMoreError -> state.copy(isLoadingMore = false)
             is SubredditResult.LoadMoreSuccessful -> state.copy(links = state.links.plus(result.links.children))
+            SubredditResult.EndOfItems -> state.copy(isLoadingMore = false)
         }
     }
 
@@ -68,16 +66,6 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
         super.detachView(retainInstance)
         renderer.detachView()
     }
-    
-    private fun <R, N, T> paginate(requests: Observable<R>, first: N, nextPage: (T) -> N?,
-                                   stop: (T) -> Boolean, fetch: (R, N) -> Observable<T>): Observable<T> {
-        val prev = BehaviorRelay.create<N>()
-        prev.accept(first)
-        return requests.zipWith(prev, BiFunction<R, N, Pair<R, N>> { t1, t2 -> t1 to t2 })
-                .concatMap { (r, p) ->
-                    fetch(r, p).map { nextPage(it)?.let { n -> prev.accept(n) }; it }
-                }.takeUntil(stop)
-    }
 
     // TODO clean this mess up
     private fun loadLinks(loadMore: Observable<SubredditAction.LoadMore>) = { actions: Observable<SubredditAction.LoadLinks> ->
@@ -88,7 +76,7 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
                 { after: String? -> store.get(Subreddit(subreddit, after)) }
             }
 
-            paginate2<SubredditAction.LoadMore, Option<String>, SubredditResult>(
+            paginate<SubredditAction.LoadMore, Option<String>, SubredditResult>(
                     loadMore,
                     Option.None,
                     { when (it) {
@@ -102,7 +90,7 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
                         else -> false
                     } },
                     { page: Int, after: Option<String> ->
-                        fetch(after.orNull()).delay(1, TimeUnit.SECONDS)
+                        fetch(after.orNull())//.delay(1, TimeUnit.SECONDS)
                                 .map {
                                     if (page == 0) {
                                         SubredditResult.Successful(it) as SubredditResult
@@ -121,19 +109,24 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
                                     else
                                         SubredditResult.LoadMoreError
                                 }
-                    })
+                    }, SubredditResult.EndOfItems)
         }
     }
 
-    private fun <R, N, T> paginate2(trigger: Observable<R>, first: N, nextPage: (T) -> N?, stop: (T) -> Boolean, fetch: (Int, N) -> Observable<T>, pageNum: Int = 0): Observable<T> {
+    private fun <R, N, T> paginate(trigger: Observable<R>, first: N, nextPage: (T) -> N?,
+                                   stop: (T) -> Boolean,
+                                   fetch: (Int, N) -> Observable<T>,
+                                   end: T,
+                                   pageNum: Int = 0): Observable<T> {
         return fetch(pageNum, first)
                 .concatMap { page ->
                     val after = nextPage(page)?.let {
-                        trigger.take(1).ignoreElements().andThen(paginate2(trigger, it, nextPage, stop, fetch, pageNum + 1))
+                        paginate(trigger, it, nextPage, stop, fetch, end, pageNum + 1).delaySubscription(trigger)
                     } ?: Observable.empty()
                     Observable.just(page)
                             .concatWith(after)
                 }.takeUntil(stop)
+                .concatWith(Observable.just(end))
     }
 }
 

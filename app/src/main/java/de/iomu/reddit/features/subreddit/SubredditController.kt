@@ -13,6 +13,7 @@ import de.iomu.reddit.R
 import de.iomu.reddit.base.BaseController
 import de.iomu.reddit.data.model.Link
 import de.iomu.reddit.ui.components.EmptyComponent
+import de.iomu.reddit.ui.components.LoadingListItem
 import de.iomu.reddit.ui.components.RecyclerWrapper
 import de.iomu.reddit.ui.components.TextLinkItem
 import de.iomu.reddit.util.EndlessRecyclerScrollListener
@@ -66,6 +67,7 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
 
     override fun onViewBound(view: View) {
         super.onViewBound(view)
+      //  binder.insertItemAt(0, LoadingListItem.create(context).loading(false).build())
         coordinator.attachView(this)
     }
 
@@ -89,6 +91,10 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
     }
 
     private fun updateLoadingMore(loading: Boolean) {
+       if (!loading) {
+           binder.updateItemAt(binder.itemCount - 1, LoadingListItem.create(context).loading(loading).build())
+       }
+
     }
 
     private fun addLinks(links: List<Link>) {
@@ -102,7 +108,7 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
                     .component(it)
                     .build()
         }
-        binder.insertRangeAt(binder.itemCount, infos)
+        binder.insertRangeAt(binder.itemCount - 1, infos)
         Timber.d("Last link: %s", links.lastOrNull()?.id())
     }
 
@@ -112,11 +118,13 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
                     .link(it)
                     .listener { Timber.d(it.toString()) }
                     .build()
-        }.map {
-            ComponentInfo.create()
+        }
+            .plus(LoadingListItem.create(context).loading(true).build())
+            .map {
+                ComponentInfo.create()
                     .component(it)
                     .build()
-        }
+            }
         binder.removeRangeAt(0, binder.itemCount)
         binder.insertRangeAt(0, infos)
     }
