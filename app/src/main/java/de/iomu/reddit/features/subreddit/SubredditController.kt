@@ -5,6 +5,8 @@ import android.support.v7.widget.OrientationHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toolbar
+import butterknife.BindView
 import com.facebook.litho.*
 import com.facebook.litho.widget.*
 import com.facebook.yoga.YogaAlign
@@ -37,38 +39,53 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
     lateinit var coordinator: SubredditCoordinator
 
     lateinit var binder: RecyclerBinder
-    lateinit var context: ComponentContext
+    private val context: ComponentContext
+        get() = lithoView.componentContext
     private val recyclerController = RecyclerEventsController()
     lateinit var scrollListener: EndlessRecyclerScrollListener
+
+    @BindView(R.id.toolbar)
+    lateinit var toolbar: Toolbar
+
+    @BindView(R.id.litho_view)
+    lateinit var lithoView: LithoView
 
     constructor(subreddit: String) : this(createBundle(subreddit)) {
         this.subreddit = subreddit
     }
 
     override fun inflate(inflater: LayoutInflater, container: ViewGroup): View {
-        context = ComponentContext(container.context)
-        binder = RecyclerBinder(context, LinearLayoutInfo(container.context, OrientationHelper.VERTICAL, false))
-        scrollListener = EndlessRecyclerScrollListener(binder) {
-            Timber.d("Load more")
-            loadMoreRelay.accept(SubredditContract.ViewIntention.LoadMore)
-        }
-        return LithoView.create(
-                container.context,
-                RecyclerWrapper.create(context)
-                        .binder(binder)
-                        .controller(recyclerController)
-                        .refreshListener {
-                            pullToRefreshRelay.accept(SubredditContract.ViewIntention.Refresh)
-                        }
-                        .recyclerViewId(R.id.link_list)
-                        .onScrollListener(scrollListener)
-                        .build())
+
+
+        return inflater.inflate(R.layout.controller_subreddit, container, false)
     }
 
     override fun onViewBound(view: View) {
         super.onViewBound(view)
-      //  binder.insertItemAt(0, LoadingListItem.create(context).loading(false).build())
+        initToolbar()
+        initList(view)
         coordinator.attachView(this)
+    }
+
+    private fun initToolbar() {
+        toolbar.title = subreddit
+    }
+
+    private fun initList(view: View) {
+        binder = RecyclerBinder(context, LinearLayoutInfo(view.context, OrientationHelper.VERTICAL, false))
+        scrollListener = EndlessRecyclerScrollListener(binder) {
+            Timber.d("Load more")
+            loadMoreRelay.accept(SubredditContract.ViewIntention.LoadMore)
+        }
+        lithoView.setComponent(RecyclerWrapper.create(context)
+                .binder(binder)
+                .controller(recyclerController)
+                .refreshListener {
+                    pullToRefreshRelay.accept(SubredditContract.ViewIntention.Refresh)
+                }
+                .recyclerViewId(R.id.link_list)
+                .onScrollListener(scrollListener)
+                .build())
     }
 
     override fun onDestroyView(view: View) {
