@@ -1,6 +1,7 @@
 package de.iomu.reddit.features.subreddit
 
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v7.widget.OrientationHelper
 import android.text.InputType
 import android.view.LayoutInflater
@@ -139,7 +140,12 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
             is SubredditContract.ViewAction.AddLinks -> addLinks(action.links)
             is SubredditContract.ViewAction.ShowLoadingMore -> updateLoadingMore(true)
             is SubredditContract.ViewAction.HideLoadingMore -> updateLoadingMore(false)
+            is SubredditContract.ViewAction.ShowError -> showError(action.message)
         }
+    }
+
+    private fun showError(message: String) {
+        Snackbar.make(lithoView, "Error loading posts", Snackbar.LENGTH_SHORT).show()
     }
 
     private fun updateLoadingMore(loading: Boolean) {
