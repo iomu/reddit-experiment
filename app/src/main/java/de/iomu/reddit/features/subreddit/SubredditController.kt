@@ -2,11 +2,17 @@ package de.iomu.reddit.features.subreddit
 
 import android.os.Bundle
 import android.support.v7.widget.OrientationHelper
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toolbar
 import butterknife.BindView
+import com.afollestad.materialdialogs.DialogAction
+import com.afollestad.materialdialogs.MaterialDialog
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.RouterTransaction
+import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import com.facebook.litho.*
 import com.facebook.litho.widget.*
 import com.facebook.yoga.YogaAlign
@@ -55,8 +61,6 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
     }
 
     override fun inflate(inflater: LayoutInflater, container: ViewGroup): View {
-
-
         return inflater.inflate(R.layout.controller_subreddit, container, false)
     }
 
@@ -69,6 +73,37 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
 
     private fun initToolbar() {
         toolbar.title = subreddit
+        toolbar.inflateMenu(R.menu.subreddit_toolbar)
+        toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_change_subreddit -> {
+                    showChangeSubredditDialog()
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
+    }
+
+    private fun showChangeSubredditDialog() {
+        val dialog = MaterialDialog.Builder(lithoView.context) // TODO context
+                .title(R.string.change_subreddit)
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input("Subreddit", null) { dialog, input ->
+                    changeSubreddit(input ?: return@input)
+                }
+                .negativeText("Cancel")
+                .build()
+        dialog.show()
+    }
+
+    // TODO this shouldn't be part of the view
+    private fun changeSubreddit(subreddit: CharSequence) {
+        router.pushController(RouterTransaction.with(SubredditController(subreddit.toString()))
+                .pushChangeHandler(HorizontalChangeHandler())
+                .popChangeHandler(HorizontalChangeHandler()))
     }
 
     private fun initList(view: View) {

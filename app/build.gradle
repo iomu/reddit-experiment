@@ -79,6 +79,9 @@ dependencies {
 
     // SoLoader
     compile 'com.facebook.soloader:soloader:0.2.0'
+
+    compile 'com.afollestad.material-dialogs:core:0.9.4.4'
+
 }
 repositories {
     mavenCentral()

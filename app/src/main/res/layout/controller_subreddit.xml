@@ -17,7 +17,8 @@
         <Toolbar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:titleTextColor="@android:color/primary_text_dark"
+            android:theme="@style/AppTheme.ActionBar"
+
             android:id="@+id/toolbar"
             app:layout_scrollFlags="scroll|enterAlways"/>
     </android.support.design.widget.AppBarLayout>

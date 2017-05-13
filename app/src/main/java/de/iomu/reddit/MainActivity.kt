@@ -57,4 +57,10 @@ class MainActivity : Activity(), HasDispatchingControllerInjector {
     override fun controllerInjector(): DispatchingAndroidInjector<Controller> {
         return controllerInjector
     }
+
+    override fun onBackPressed() {
+        if (!router.handleBack()) {
+            super.onBackPressed()
+        }
+    }
 }

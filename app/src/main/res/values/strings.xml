@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Reddit</string>
+    <string name="change_subreddit">Change subreddit</string>
 </resources>
