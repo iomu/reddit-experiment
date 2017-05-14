@@ -20,7 +20,7 @@ interface LinkContract {
 
     interface View : MviView<ViewIntention, ViewAction>
 
-    data class ViewState(val link: Link?, val comments: List<CommentItem>, val loading: Boolean = false,
+    data class ViewState(val link: Link?, val comments: List<CommentItem>, val loading: Boolean = true,
                          val errorMessage: String = "")
 }
 

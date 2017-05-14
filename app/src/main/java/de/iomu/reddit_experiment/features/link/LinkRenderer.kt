@@ -21,7 +21,7 @@ class LinkRenderer @Inject constructor() : RxRenderer<LinkContract.ViewState, Li
             val comments = shared.map { it.comments }
                     .distinctUntilChanged()
                     .map { LinkContract.ViewAction.ShowComments(it) }
-                    .minimumDelay(750, TimeUnit.MILLISECONDS)
+                 //   .minimumDelay(750, TimeUnit.MILLISECONDS)
 
             val errors = shared.map { it.errorMessage }
                     .filter { it != "" }
@@ -36,7 +36,8 @@ class LinkRenderer @Inject constructor() : RxRenderer<LinkContract.ViewState, Li
                         } else {
                             LinkContract.ViewAction.HideLoading
                         }
-                    }.minimumDelay(750, TimeUnit.MILLISECONDS)
+                    }
+                    //.minimumDelay(750, TimeUnit.MILLISECONDS)
 
             Observable.merge(listOf(link, comments, errors, loading))
         }
