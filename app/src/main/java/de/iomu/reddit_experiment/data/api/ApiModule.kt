@@ -27,13 +27,13 @@ class ApiModule {
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
                 .add(RedditAdapterFactory.create())
-                .add { type, annotations, moshi ->
+              /*  .add { type, annotations, moshi ->
                     if (type == CommentResponse::class.java) {
                         CommentResponseAdapter(moshi)
                     } else {
                         null
                     }
-                }
+                } */
                 .build()
     }
 
@@ -42,6 +42,7 @@ class ApiModule {
     fun provideGson(): Gson {
         return GsonBuilder()
                 .registerTypeAdapterFactory(RedditTypeAdapterFactory.create())
+                .registerTypeAdapterFactory(CommentItemAdapterFactory())
                 .registerTypeAdapterFactory(CommentResponseAdapterFactory())
                 .create()
 
@@ -78,11 +79,11 @@ class ListingThingConverter<T>(val delegate: Converter<ResponseBody, Thing<Listi
 
 class ListingThingConverterFactory : Converter.Factory() {
     override fun responseBodyConverter(type: Type, annotations: Array<out Annotation>, retrofit: Retrofit): Converter<ResponseBody, *> {
-        if (type is ParameterizedType && type.rawType == Listing::class.java && type.actualTypeArguments.first() == Comment::class.java) {
+        if (type is ParameterizedType && type.rawType == Listing::class.java && type.actualTypeArguments.first() == CommentModel::class.java) {
             val thingType = Types.newParameterizedType(Thing::class.java, type.actualTypeArguments.first())
             val listingType = Types.newParameterizedType(Listing::class.java, thingType)
             val thingListing = Types.newParameterizedType(Thing::class.java, listingType)
-            val delegate: Converter<ResponseBody, Thing<Listing<Thing<Comment>>>> = retrofit.nextResponseBodyConverter(this, thingListing, annotations)
+            val delegate: Converter<ResponseBody, Thing<Listing<Thing<CommentModel>>>> = retrofit.nextResponseBodyConverter(this, thingListing, annotations)
             return ListingThingConverter(delegate)
         } else {
             return retrofit.nextResponseBodyConverter<Any>(this, type, annotations)

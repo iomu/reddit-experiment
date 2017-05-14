@@ -14,11 +14,11 @@ interface RedditApi {
     fun getLinksForSubreddit(@Path("subreddit") subreddit: String): Observable<Listing<Link>>
 
     @GET("r/{subreddit}.json")
-    fun rawGetLinksForSubreddit(@Path("subreddit") subreddit: String, @Query("after") after: String?): Observable<ResponseBody>
+    fun rawGetLinksForSubreddit(@Path("subreddit") subreddit: String, @Query("after") after: String? = null): Observable<ResponseBody>
 
-    @GET("r/{subreddit}/comments/{link}.json")
-    fun getComments(@Path("subreddit") subreddit: String, @Path("link") link: String): Observable<CommentResponse>
+    @GET("r/{subreddit}/comments/{linkId}.json")
+    fun getComments(@Path("subreddit") subreddit: String, @Path("linkId") link: String): Observable<CommentResponse>
 
-    @GET("r/{subreddit}/comments/{link}.json")
-    fun rawGetComments(@Path("subreddit") subreddit: String, @Path("link") link: String): Observable<ResponseBody>
+    @GET("comments/{linkId}.json")
+    fun rawGetComments(@Path("linkId") link: String, @Query("depth") depth: Int? = null): Observable<ResponseBody>
 }

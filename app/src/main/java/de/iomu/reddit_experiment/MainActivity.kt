@@ -15,7 +15,8 @@ import de.iomu.reddit_experiment.base.HasDispatchingControllerInjector
 import de.iomu.reddit_experiment.data.api.RedditApi
 import de.iomu.reddit_experiment.data.model.Link
 import de.iomu.reddit_experiment.data.model.Listing
-import de.iomu.reddit_experiment.data.store.Subreddit
+import de.iomu.reddit_experiment.data.store.SubredditKey
+import de.iomu.reddit_experiment.features.link.LinkController
 import de.iomu.reddit_experiment.features.subreddit.SubredditController
 import javax.inject.Inject
 
@@ -24,7 +25,7 @@ class MainActivity : Activity(), HasDispatchingControllerInjector {
     lateinit var api: RedditApi
 
     @Inject
-    lateinit var store: Store<Listing<Link>, Subreddit>
+    lateinit var store: Store<Listing<Link>, SubredditKey>
 
     @Inject
     lateinit var controllerInjector: DispatchingAndroidInjector<Controller>

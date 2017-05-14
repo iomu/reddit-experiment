@@ -68,8 +68,6 @@ dependencies {
 
     compile 'com.bluelinelabs:conductor:2.1.2'
 
-    compile 'com.jakewharton:butterknife:8.5.1'
-    kapt 'com.jakewharton:butterknife-compiler:8.5.1'
 
     // Litho
     compile 'com.facebook.litho:litho-core:0.2.0'
@@ -81,6 +79,8 @@ dependencies {
     compile 'com.facebook.soloader:soloader:0.2.0'
 
     compile 'com.afollestad.material-dialogs:core:0.9.4.4'
+
+    compile 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
 
 
 }

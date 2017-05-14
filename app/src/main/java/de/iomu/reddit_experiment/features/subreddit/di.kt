@@ -24,7 +24,7 @@ abstract class SubredditInjectionModule {
     @Binds
     @IntoMap
     @ControllerKey(SubredditController::class)
-    internal abstract fun bindYourControllerInjectorFactory(builder: SubredditComponent.Builder): AndroidInjector.Factory<out Controller>
+    internal abstract fun bindSubredditControllerInjectorFactory(builder: SubredditComponent.Builder): AndroidInjector.Factory<out Controller>
 }
 
 @Module

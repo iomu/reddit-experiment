@@ -5,7 +5,7 @@ import de.iomu.reddit_experiment.base.mvi.BaseCoordinator
 import de.iomu.reddit_experiment.base.ControllerScope
 import de.iomu.reddit_experiment.data.model.Link
 import de.iomu.reddit_experiment.data.model.Listing
-import de.iomu.reddit_experiment.data.store.Subreddit
+import de.iomu.reddit_experiment.data.store.SubredditKey
 import de.iomu.reddit_experiment.util.Option
 import de.iomu.reddit_experiment.util.toOption
 import io.reactivex.Observable
@@ -16,7 +16,7 @@ import javax.inject.Named
 
 @ControllerScope
 class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
-                                               val store: Store<Listing<Link>, Subreddit>,
+                                               val store: Store<Listing<Link>, SubredditKey>,
                                                @Named("subreddit") val subreddit: String) :
         BaseCoordinator<SubredditContract.ViewIntention, SubredditAction, SubredditResult, SubredditContract.ViewState, SubredditContract.View>() {
 
@@ -71,9 +71,9 @@ class SubredditCoordinator @Inject constructor(val renderer: SubredditRenderer,
     private fun loadLinks(loadMore: Observable<SubredditAction.LoadMore>) = { actions: Observable<SubredditAction.LoadLinks> ->
         actions.switchMap {
             val fetch = if (it.refresh) {
-                { after: String? -> store.fetch(Subreddit(subreddit, after)) }
+                { after: String? -> store.fetch(SubredditKey(subreddit, after)) }
             } else {
-                { after: String? -> store.get(Subreddit(subreddit, after)) }
+                { after: String? -> store.get(SubredditKey(subreddit, after)) }
             }
 
             paginate<SubredditAction.LoadMore, Option<String>, SubredditResult>(

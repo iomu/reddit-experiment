@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toolbar
-import butterknife.BindView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
@@ -18,6 +17,9 @@ import com.jakewharton.rxrelay2.PublishRelay
 import de.iomu.reddit_experiment.R
 import de.iomu.reddit_experiment.base.BaseController
 import de.iomu.reddit_experiment.data.model.Link
+import de.iomu.reddit_experiment.features.link.LinkController
+import de.iomu.reddit_experiment.kotterknife.Resetter
+import de.iomu.reddit_experiment.kotterknife.bindView
 import de.iomu.reddit_experiment.ui.components.LoadingListItem
 import de.iomu.reddit_experiment.ui.components.RecyclerWrapper
 import de.iomu.reddit_experiment.ui.components.TextLinkItem
@@ -47,21 +49,22 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
     private val recyclerController = RecyclerEventsController()
     lateinit var scrollListener: EndlessRecyclerScrollListener
 
-    @BindView(R.id.toolbar)
-    lateinit var toolbar: Toolbar
+    private val unbinder = Resetter()
 
-    @BindView(R.id.litho_view)
-    lateinit var lithoView: LithoView
+    private val toolbar: Toolbar by bindView(R.id.toolbar, unbinder)
+    private val lithoView: LithoView by bindView(R.id.litho_view, unbinder)
 
     constructor(subreddit: String) : this(createBundle(subreddit)) {
         this.subreddit = subreddit
     }
 
     override fun inflate(inflater: LayoutInflater, container: ViewGroup): View {
+        Timber.d("Inflate")
         return inflater.inflate(R.layout.controller_subreddit, container, false)
     }
 
     override fun onViewBound(view: View) {
+        Timber.d("View bound")
         super.onViewBound(view)
         initToolbar()
         initList(view)
@@ -88,7 +91,7 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
         val dialog = MaterialDialog.Builder(lithoView.context) // TODO context
                 .title(R.string.change_subreddit)
                 .inputType(InputType.TYPE_CLASS_TEXT)
-                .input("Subreddit", null) { dialog, input ->
+                .input("SubredditKey", null) { dialog, input ->
                     changeSubreddit(input ?: return@input)
                 }
                 .negativeText("Cancel")
@@ -115,13 +118,13 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
                 .refreshListener {
                     pullToRefreshRelay.accept(SubredditContract.ViewIntention.Refresh)
                 }
-
                 .recyclerViewId(R.id.link_list)
                 .onScrollListener(scrollListener)
                 .build())
     }
 
     override fun onDestroyView(view: View) {
+        unbinder.reset()
         coordinator.detachView(activity?.isChangingConfigurations ?: false)
         super.onDestroyView(view)
     }
@@ -149,14 +152,19 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
        if (!loading) {
            binder.updateItemAt(binder.itemCount - 1, LoadingListItem.create(context).loading(loading).build())
        }
+    }
 
+    private fun showLinkPage(link: Link) {
+        router.pushController(RouterTransaction.with(LinkController(link))
+                .pushChangeHandler(HorizontalChangeHandler())
+                .popChangeHandler(HorizontalChangeHandler()))
     }
 
     private fun addLinks(links: List<Link>) {
         val infos = links.map {
             TextLinkItem.create(context)
                     .link(it)
-                    .listener { Timber.d(it.toString()) }
+                    .listener { showLinkPage(it) }
                     .build()
         }.map {
             ComponentInfo.create()
@@ -164,14 +172,13 @@ class SubredditController(args: Bundle) : BaseController(args), SubredditContrac
                     .build()
         }
         binder.insertRangeAt(binder.itemCount - 1, infos)
-        Timber.d("Last link: %s", links.lastOrNull()?.id())
     }
 
     private fun displayLinks(links: List<Link>) {
         val infos = links.map {
             TextLinkItem.create(context)
                     .link(it)
-                    .listener { Timber.d(it.toString()) }
+                    .listener { showLinkPage(it) }
                     .build()
         }
             .plus(LoadingListItem.create(context).loading(true).build())

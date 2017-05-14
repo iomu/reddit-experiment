@@ -4,21 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import butterknife.ButterKnife
-import butterknife.Unbinder
 import com.bluelinelabs.conductor.Controller
 import timber.log.Timber
 
 abstract class BaseController(args: Bundle?) : Controller() {
-    private var unbinder: Unbinder? = null
-
+    private var injected: Boolean = false
+    init {
+        addLifecycleListener(object : LifecycleListener() {
+            override fun postCreateView(controller: Controller, view: View) {
+                onViewBound(view)
+            }
+        })
+    }
     constructor() : this(null)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflate(inflater, container)
-        unbinder = ButterKnife.bind(this, view)
-        inject(this)
-        onViewBound(view)
+        if (!injected) {
+            inject(this)
+            injected = true
+        }
+
         return view
     }
 
@@ -26,14 +32,7 @@ abstract class BaseController(args: Bundle?) : Controller() {
 
     open protected fun onViewBound(view: View) {}
 
-    override fun onDestroyView(view: View) {
-        super.onDestroyView(view)
-        unbinder?.unbind()
-        unbinder = null
-    }
-
     companion object {
-
         fun inject(controller: Controller) {
             val hasControllerInjector = findHasControllerInjector(controller) ?: return
             Timber.d("Injector provider was found: %s", hasControllerInjector::class.java.canonicalName)

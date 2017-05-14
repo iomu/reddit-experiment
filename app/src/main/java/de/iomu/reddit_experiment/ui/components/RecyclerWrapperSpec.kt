@@ -1,5 +1,6 @@
 package de.iomu.reddit_experiment.ui.components
 
+import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.RecyclerView
 
 import com.facebook.litho.ComponentContext
@@ -21,6 +22,7 @@ class RecyclerWrapperSpec {
                     .binder(binder)
                     .recyclerEventsController(controller)
                     .recyclerViewId(recyclerViewId)
+                    .itemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
                     .onScrollListener(onScrollListener)
                     .refreshHandler(RecyclerWrapper.onPullToRefresh(context))
             return builder.buildWithLayout()

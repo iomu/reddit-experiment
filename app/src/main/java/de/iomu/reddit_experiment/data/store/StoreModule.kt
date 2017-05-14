@@ -21,12 +21,12 @@ import okio.BufferedSource
 class StoreModule {
     @Provides
     @UserScope
-    fun provideSubredditStore(gson: Gson, app: RedditApp, redditApi: RedditApi): Store<Listing<Link>, Subreddit> {
+    fun provideSubredditStore(gson: Gson, app: RedditApp, redditApi: RedditApi): Store<Listing<Link>, SubredditKey> {
         val thingType = Types.newParameterizedType(Thing::class.java, Link::class.java)
         val listingType = Types.newParameterizedType(Listing::class.java, thingType)
         val thingListing = Types.newParameterizedType(Thing::class.java, listingType)
 
-        return StoreBuilder.parsedWithKey<Subreddit, BufferedSource, Listing<Link>>()
+        return StoreBuilder.parsedWithKey<SubredditKey, BufferedSource, Listing<Link>>()
                 .fetcher {
                     redditApi.rawGetLinksForSubreddit(it.name, it.after).map { it.source() }
                 }
@@ -41,7 +41,7 @@ class StoreModule {
     fun provideLinkStore(gson: Gson, app: RedditApp, redditApi: RedditApi): Store<CommentResponse, LinkKey> {
         return StoreBuilder.parsedWithKey<LinkKey, BufferedSource, CommentResponse>()
                 .fetcher {
-                    redditApi.rawGetComments(it.subreddit, it.id).map { it.source() }
+                    redditApi.rawGetComments(it.id, it.depth).map { it.source() }
                 }
                 .persister(SourcePersister(app.cacheDir, { it.toString() }))
                 .parser(GsonParserFactory.createSourceParser(gson, CommentResponse::class.java))
@@ -50,6 +50,6 @@ class StoreModule {
     }
 }
 
-data class Subreddit(val name: String, val after: String? = null)
-data class LinkKey(val subreddit: String, val id: String)
+data class SubredditKey(val name: String, val after: String? = null)
+data class LinkKey(val id: String, val depth: Int? = null)
 

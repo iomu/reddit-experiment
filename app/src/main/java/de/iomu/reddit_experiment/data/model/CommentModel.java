@@ -10,23 +10,23 @@ import com.squareup.moshi.Moshi;
 import javax.annotation.Nullable;
 
 @AutoValue
-public abstract class Comment implements Votable, Created {
+public abstract class CommentModel implements Votable, Created {
     public abstract String author();
     public abstract String body();
     public abstract int score();
     @Json(name = "score_hidden")  public abstract boolean isScoreHidden();
-    @Nullable public abstract Thing<Listing<Thing<Comment>>> replies();
+    @Nullable public abstract Thing<Listing<Thing<CommentItem>>> replies();
 
     /*public static Comment create(int ups, int downs, long created, long createdUTC,
                                  String author, String body, int score, boolean scoreHidden, List<Comment> replies) {
         return new AutoValue_Comment(ups, downs, created, createdUTC, author, body, score, scoreHidden, replies);
     }*/
 
-    public static JsonAdapter<Comment> jsonAdapter(Moshi moshi) {
-        return new  AutoValue_Comment.MoshiJsonAdapter(moshi);
+    public static JsonAdapter<CommentModel> jsonAdapter(Moshi moshi) {
+        return new AutoValue_CommentModel.MoshiJsonAdapter(moshi);
     }
 
-    public static TypeAdapter<Comment> typeAdapter(Gson gson) {
-        return new AutoValue_Comment.GsonTypeAdapter(gson);
+    public static TypeAdapter<CommentModel> typeAdapter(Gson gson) {
+        return new AutoValue_CommentModel.GsonTypeAdapter(gson);
     }
 }

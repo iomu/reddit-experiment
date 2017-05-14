@@ -1,11 +1,13 @@
 package de.iomu.reddit_experiment.features.subreddit
 
+import de.iomu.reddit_experiment.base.ControllerScope
 import de.iomu.reddit_experiment.base.mvi.RxRenderer
 import de.iomu.reddit_experiment.data.model.Link
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import javax.inject.Inject
 
+@ControllerScope
 class SubredditRenderer @Inject constructor(): RxRenderer<SubredditContract.ViewState, SubredditContract.ViewAction, SubredditContract.View>() {
     override fun viewActions(stateStream: Observable<SubredditContract.ViewState>): Observable<SubredditContract.ViewAction> {
         return stateStream.publish { shared ->
